@@ -1,0 +1,486 @@
+/*
+  App para listar material escolar
+
+*/
+
+import 'package:flutter/material.dart';
+
+
+class Material {
+  // Atributos
+  String _nome;
+  int _qtde;
+  
+
+  // Construtor
+  Material(this._qtde, [this._nome]);
+
+}
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  final List<Material> lista = []; // Lista vazia
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: "APP DE MATERIAIS",
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: HomePage(lista),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  final List<Material> lista;
+
+  // Construtor
+  HomePage(this.lista);
+
+  @override
+  _HomePageState createState() => _HomePageState(lista);
+}
+
+class _HomePageState extends State<HomePage> {
+  final List<Material> lista;
+
+  // Construtor
+  _HomePageState(this.lista);
+
+  // Métodos
+  void _atualizarTela() {
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // This method is rerun every time setState is called, for instance as done
+    // by the _incrementCounter method above.
+    return Scaffold(
+      drawer: NavDrawer(lista),
+      appBar: AppBar(
+        title: Text("Material (${lista.length})"),
+      ),
+      body: ListView.builder(
+          itemCount: lista.length,
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+              title: Text(
+                "${lista[index]._nome}",
+                style: TextStyle(fontSize: 18.0),
+              ),
+              onTap: () {},
+            );
+          }),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _atualizarTela,
+        tooltip: 'Atualizar',
+        child: Icon(Icons.update),
+      ),
+    );
+  }
+}
+
+class NavDrawer extends StatelessWidget {
+  // Atributos
+  final List lista;
+  final double _fontSize = 17.0;
+
+  // Construtor
+  NavDrawer(this.lista);
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          // Opcional
+          DrawerHeader(
+            child: Text(
+              "Menu",
+              style: TextStyle(color: Colors.white, fontSize: 25),
+            ),
+            decoration: BoxDecoration(color: Colors.red),
+          ),
+          ListTile(
+            leading: Icon(Icons.person),
+            title: Text(
+              "Informações do Material",
+              style: TextStyle(fontSize: _fontSize),
+            ),
+            onTap: () {
+              Navigator.pop(context); // Fecha o Drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TelaInformacoesDoMaterial(lista),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.person_add_alt_1_sharp),
+            title: Text(
+              "Cadastrar um Novo Material",
+              style: TextStyle(fontSize: _fontSize),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TelaCadastrarMaterial(lista),
+                ),
+              );
+            },
+          ),
+          Container(
+            padding: EdgeInsets.all(20.0),
+          ),
+          ListTile(
+            leading: Icon(Icons.person_search),
+            title: Text(
+              "Sobre",
+              style: TextStyle(fontSize: _fontSize),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TelaSobre(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+//-----------------------------------------------------------------------------
+// Tela Informações do Material
+//-----------------------------------------------------------------------------
+
+class TelaInformacoesDoMaterial extends StatefulWidget {
+  final List<Material> lista;
+
+  // Construtor
+  TelaInformacoesDoMaterial(this.lista);
+
+  @override
+  _TelaInformacoesDoMaterial createState() => _TelaInformacoesDoMaterial(lista);
+}
+
+class _TelaInformacoesDoMaterial extends State<TelaInformacoesDoMaterial> {
+  // Atributos
+  final List lista;
+  Material material;
+  int index = -1;
+  double _fontSize = 18.0;
+  final nomeController = TextEditingController();
+  final qtdeController = TextEditingController();
+  bool _edicaoHabilitada = false;
+
+  // Construtor
+  _TelaInformacoesDoMaterial(this.lista) {
+    if (lista.length > 0) {
+      index = 0;
+      material = lista[0];
+      nomeController.text = material._nome;
+      qtdeController.text = material._qtde.toString();
+    }
+  }
+
+  // Métodos
+  void _exibirRegistro(index) {
+    if (index >= 0 && index < lista.length) {
+      this.index = index;
+      material = lista[index];
+      nomeController.text = material._nome;
+      qtdeController.text = material._qtde.toString();
+      setState(() {});
+    }
+  }
+
+  void _atualizarDados() {
+    if (index >= 0 && index < lista.length) {
+      _edicaoHabilitada = false;
+      lista[index]._nome = nomeController.text;
+      lista[index]._qtde = int.parse(qtdeController.text);
+      setState(() {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var titulo = "Informações do Material";
+    if (material == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(titulo)),
+        body: Column(
+          children: <Widget>[
+            Text("Nenhum material encontrado!"),
+            Container(
+              color: Colors.blueGrey,
+              child: BackButton(),
+            ),
+          ],
+        ),
+      );
+    }
+    return Scaffold(
+      appBar: AppBar(title: Text(titulo)),
+      body: Container(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Align(
+              alignment: Alignment.topRight,
+              child: FloatingActionButton(
+                heroTag: null,
+                onPressed: () {
+                  _edicaoHabilitada = true;
+                  setState(() {});
+                },
+                tooltip: 'Primeiro',
+                child: Text("Hab. Edição"),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(5),
+              child: TextField(
+                enabled: _edicaoHabilitada,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: "Nome do material",
+                  // hintText: "Nome do material",
+                ),
+                style: TextStyle(fontSize: _fontSize),
+                controller: nomeController,
+              ),
+            ),
+            // --- Quantidade do Material ---
+            Padding(
+              padding: EdgeInsets.all(5),
+              child: TextField(
+                enabled: _edicaoHabilitada,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: "Quantidade",
+                  // hintText: 'Quantidade',
+                ),
+                style: TextStyle(fontSize: _fontSize),
+                controller: qtdeController,
+              ),
+            ),
+
+
+            RaisedButton(
+              child: Text(
+                "Atualizar Dados",
+                style: TextStyle(fontSize: _fontSize),
+              ),
+              onPressed: _atualizarDados,
+            ),
+            Text(
+              "[${index + 1}/${lista.length}]",
+              style: TextStyle(fontSize: 15.0),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <FloatingActionButton>[
+                  FloatingActionButton(
+                    heroTag: null,
+                    onPressed: () => _exibirRegistro(0),
+                    tooltip: 'Primeiro',
+                    child: Icon(Icons.first_page),
+                  ),
+                  FloatingActionButton(
+                    heroTag: null,
+                    onPressed: () => _exibirRegistro(index - 1),
+                    tooltip: 'Primeiro',
+                    child: Icon(Icons.navigate_before),
+                  ),
+                  FloatingActionButton(
+                    heroTag: null,
+                    onPressed: () => _exibirRegistro(index + 1),
+                    tooltip: 'Primeiro',
+                    child: Icon(Icons.navigate_next),
+                  ),
+                  FloatingActionButton(
+                    heroTag: null,
+                    onPressed: () => _exibirRegistro(lista.length - 1),
+                    tooltip: 'Primeiro',
+                    child: Icon(Icons.last_page),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+//-----------------------------------------------------------------------------
+// Tela: Buscar por Material
+// ----------------------------------------------------------------------------
+
+class TelaSobre extends StatefulWidget {
+  @override
+  _TelaSobreState createState() => _TelaSobreState();
+}
+
+class _TelaSobreState extends State<TelaSobre> {
+  
+  
+
+  double _fontSize = 20.0;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("SOBRE"),
+      ),
+      body: Container(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          // mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+              
+              child: Center (child: Text(
+                "Aplicativo Flutter \n  - Versão 0.00.1 \n - RA: 190007718 \n - UNISAL",
+                style: TextStyle(fontSize: _fontSize),
+              ),
+
+              ),
+            ),
+
+          ],
+        ),
+      ),
+    );
+  }
+  
+  
+  
+}
+
+//-----------------------------------------------------------------------------
+// Tela: Cadastrar Material
+// ----------------------------------------------------------------------------
+
+class TelaCadastrarMaterial extends StatefulWidget {
+  final List<Material> lista;
+
+  // Construtor
+  TelaCadastrarMaterial(this.lista);
+
+  @override
+  _TelaCadastrarMaterialState createState() =>
+      _TelaCadastrarMaterialState(lista);
+}
+
+class _TelaCadastrarMaterialState extends State<TelaCadastrarMaterial> {
+  // Atributos
+  final List<Material> lista;
+  String _nome = "";
+  int _qtde = 0;
+  double _fontSize = 20.0;
+  final nomeController = TextEditingController();
+  final qtdeController = TextEditingController();
+
+  // Construtor
+  _TelaCadastrarMaterialState(this.lista);
+
+  // Métodos
+  void _cadastrarMaterial() {
+    _nome = nomeController.text;
+    _qtde = int.parse(qtdeController.text);
+    if (_qtde > 0) {
+      var material = Material(_qtde,_nome); // Cria um novo objeto
+      lista.add(material);
+      // _index = lista.length - 1;
+      nomeController.text = "";
+      qtdeController.text = "";
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Cadastrar Material"),
+      ),
+      body: Container(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          // mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+              child: Text(
+                "Dados do Material:",
+                style: TextStyle(fontSize: _fontSize),
+              ),
+            ),
+            // --- Nome do Material ---
+            Padding(
+              padding: EdgeInsets.all(5),
+              child: TextField(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: "Nome do Material",
+                  // hintText: "Nome do material",
+                ),
+                style: TextStyle(fontSize: _fontSize),
+                controller: nomeController,
+              ),
+            ),
+            // --- Quantidade do Material ---
+            Padding(
+              padding: EdgeInsets.all(5),
+              child: TextField(
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: "Quantidade",
+                  // hintText: 'Quantidade do Produto',
+                ),
+                style: TextStyle(fontSize: _fontSize),
+                controller: qtdeController,
+              ),
+            ),
+
+            // Saída
+            RaisedButton(
+              child: Text(
+                "Cadastrar Material",
+                style: TextStyle(fontSize: _fontSize),
+              ),
+              onPressed: _cadastrarMaterial,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
